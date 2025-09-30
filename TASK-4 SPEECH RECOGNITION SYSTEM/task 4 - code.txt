@@ -1,0 +1,49 @@
+// Define the GPIO pin for the LED.
+const int ledPin = 23;
+
+// Define the GPIO pin for the pushbutton.
+const int buttonPin = 13;
+
+// This variable stores the current state of the LED (either LOW for off or HIGH for on).
+bool ledState = LOW; 
+
+// Variables to handle "debouncing" the button. This prevents one physical press
+// from being registered as multiple rapid presses.
+long lastDebounceTime = 0;  // The last time the button state changed.
+long debounceDelay = 50;    // A 50-millisecond pause to ignore noise.
+
+void setup() {
+  // Start the serial monitor to display messages.
+  Serial.begin(115200);
+
+  // Set the LED pin as an output.
+  pinMode(ledPin, OUTPUT);
+
+  // Set the button pin as an input with an internal pull-up resistor.
+  // INPUT_PULLUP means the pin is HIGH by default and goes LOW when the button is pressed.
+  pinMode(buttonPin, INPUT_PULLUP);
+}
+
+void loop() {
+  // Read the current electrical state of the button pin.
+  int buttonReading = digitalRead(buttonPin);
+
+  // Check if the button has been pressed (LOW) and if enough time has passed
+  // since the last press to ignore any electrical noise (debouncing).
+  if (buttonReading == LOW && (millis() - lastDebounceTime) > debounceDelay) {
+    
+    // Toggle the LED's state. If it was LOW, it becomes HIGH, and vice-versa.
+    ledState = !ledState;
+    digitalWrite(ledPin, ledState);
+    
+    // Print the new state to the Serial Monitor to simulate a command.
+    if (ledState == HIGH) {
+      Serial.println("Command -> ON");
+    } else {
+      Serial.println("Command -> OFF");
+    }
+    
+    // Record the time of this button press.
+    lastDebounceTime = millis();
+  }
+}
