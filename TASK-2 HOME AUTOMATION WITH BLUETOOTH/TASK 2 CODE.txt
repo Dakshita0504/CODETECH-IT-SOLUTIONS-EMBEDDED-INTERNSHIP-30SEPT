@@ -1,0 +1,52 @@
+// Include the ESP32 Bluetooth Serial library, which is necessary for Bluetooth communication.
+#include "BluetoothSerial.h"
+
+// Create a BluetoothSerial object named SerialBT. This will handle all our Bluetooth functions.
+BluetoothSerial SerialBT;
+
+// Define the GPIO pin on the ESP32 that is connected to the relay's input (IN) pin.
+const int relayPin = 23;
+
+// A variable to store the command ('1' or '0') received over Bluetooth.
+char command;
+
+void setup() {
+  // Start the standard serial monitor for debugging purposes.
+  Serial.begin(115200);
+
+  // Initialize the Bluetooth functionality and give it a name.
+  // This is the name you will search for on your smartphone.
+  SerialBT.begin("ESP32_Control"); 
+  Serial.println("Bluetooth device is ready. You can now pair it!");
+
+  // Set the relay pin as an output pin.
+  pinMode(relayPin, OUTPUT);
+
+  // Set the initial state of the relay to OFF.
+  // Most common relay modules are "active-low," meaning a HIGH signal turns them OFF.
+  digitalWrite(relayPin, HIGH); 
+}
+
+void loop() {
+  // Check if any data has been sent from the connected Bluetooth device.
+  if (SerialBT.available()) {
+    
+    // Read the incoming character (the command).
+    command = SerialBT.read();
+    
+    // Print the received command to the serial monitor so you can see what's happening.
+    Serial.print("Received: ");
+    Serial.println(command);
+
+    // If the received command is the character '1', turn the device ON.
+    if (command == '1') {
+      digitalWrite(relayPin, LOW); // Sending a LOW signal activates the relay.
+      SerialBT.println("Device Turned ON"); // Send a confirmation message back to the phone.
+    } 
+    // If the received command is the character '0', turn the device OFF.
+    else if (command == '0') {
+      digitalWrite(relayPin, HIGH); // Sending a HIGH signal deactivates the relay.
+      SerialBT.println("Device Turned OFF"); // Send a confirmation message back.
+    }
+  }
+}
